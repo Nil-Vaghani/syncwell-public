@@ -1,0 +1,44 @@
+# Build context exclusions. Anything matched here never reaches the
+# Docker build daemon, so it cannot end up in a layer or the final image.
+#
+# Goal: the public repo's visitor-facing surface only.
+
+# Local build outputs
+/bin/
+/data/
+*.exe
+*.out
+*.log
+
+# Go vendor / cache
+/vendor/
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+
+# VCS
+.git/
+.gitattributes
+.gitignore
+
+# GitHub-specific config (workflows run on github.com, not in the image)
+.github/
+
+# Drafts and personal notes (kept out of the public artifact)
+FULL_ENGLISH.md
+FULL_GUJARATI.md
+projects_summary.md
+PLAN.md
+CONTRIBUTING.md
+
+# Internal design docs that don't belong on the public site
+DESIGN.md
+
+# Test fixtures and local scratch
+test/
+/tmp/
+
+# This file itself — Docker does not need it in the build context
+.dockerignore

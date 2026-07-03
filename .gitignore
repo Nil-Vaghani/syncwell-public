@@ -1,0 +1,14 @@
+# Binaries
+/bin/
+
+# Local persistence data dirs (created at runtime)
+/data/
+*.log
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Fly.io app state
+.fly/
