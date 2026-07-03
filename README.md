@@ -152,7 +152,7 @@ docs/              PROTOCOL.md, ROADMAP.md
 ## Deployment
 
 See **[DEPLOY.md](DEPLOY.md)** for the end-to-end deployment guide
-(Fly.io, secrets, private-module fetch, verification).
+(Render.com, secrets, private-module fetch, verification).
 
 ## Roadmap
 

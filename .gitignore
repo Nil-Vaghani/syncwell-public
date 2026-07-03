@@ -10,5 +10,3 @@
 .idea/
 .vscode/
 
-# Fly.io app state
-.fly/
