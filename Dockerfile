@@ -17,7 +17,7 @@ ENV GOPRIVATE=github.com/Nil-Vaghani/*
 RUN git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
 COPY go.mod go.sum* ./
-RUN go mod download
+RUN go mod tidy && go mod download
 
 COPY . .
 
