@@ -25,6 +25,15 @@ jobs:
           # it as a repository secret named GITHUB_TOKEN in GitHub
           # settings — never commit it.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The runner ships a git credential helper (set up by
+          # actions/checkout). Without this, the helper intercepts the
+          # `go mod download` request and prompts for a password; the
+          # runner has terminal prompts disabled, so it fails with
+          # "could not read Password for 'https://***@github.com'".
+          # Setting GIT_TERMINAL_PROMPT=0 makes git fail loud instead,
+          # and the token embedded in the URL rewrite above is what
+          # actually gets used for auth.
+          GIT_TERMINAL_PROMPT: 0
         run: |
           git config --global url."https://${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
           go env -w GOPRIVATE=github.com/Nil-Vaghani/*
