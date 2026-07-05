@@ -1,37 +1,31 @@
 FROM golang:1.23-alpine AS build
 WORKDIR /src
 
-RUN apk add --no-cache git
 
-# The engine lives in a separate private repo. We authenticate `go mod`
-# over HTTPS using a fine-scoped PAT passed in as a build ARG. The token
-# is only used at build time; the runtime stage does not receive it.
-# See DEPLOY.md §4 for the PAT setup and ci.yml for the same flow in CI.
-ARG GITHUB_TOKEN
+RUN apk add --no-cache git openssh-client
+
+
+RUN mkdir -p -m 0700 /root/.ssh && \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts && \
+    git config --global url."git@github.com:".insteadOf "https://github.com/"
+
+
 ENV GOPRIVATE=github.com/Nil-Vaghani/*
-RUN git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
-# 1. પહેલા કોડ કોપી કરો
+
 COPY . .
 
-# 2. કોડ કોપી થયા પછી જ tidy અને download રન કરો
+
 RUN go mod tidy && go mod download
 
-# 3. હવે બિલ્ડ કરો
+
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/syncwell ./cmd/syncwell
 
-# --- runtime stage ---
-# distroless `base` (not `static`) so we have /busybox/sh to translate
-# the platform's $PORT env var into a CLI flag. The nonroot tag is
-# non-negotiable for a public-internet container.
+
 FROM gcr.io/distroless/base-debian12:nonroot
 COPY --from=build --chown=nonroot:nonroot /out/syncwell /syncwell
 COPY --from=build --chown=nonroot:nonroot /src/demo /demo
 COPY --from=build --chown=nonroot:nonroot /src/sdk /sdk
 EXPOSE 8080
 USER nonroot:nonroot
-# Render injects $PORT (default 10000) at runtime. We bind the binary
-# to that port if set, otherwise 8080 (the local default). Note that
-# Render's free Web Service tier enforces a 5-minute WebSocket idle
-# timeout regardless of binding; see DEPLOY.md.
 ENTRYPOINT ["/busybox/sh", "-c", "exec /syncwell -addr :${PORT:-8080} -static /demo"]
