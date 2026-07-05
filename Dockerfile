@@ -3,11 +3,10 @@ WORKDIR /src
 
 RUN apk add --no-cache git openssh-client
 
-ARG SSH_PRIVATE_KEY
-
-# પહેલા ડિરેક્ટરી બનાવો, પછી કી લખો, પછી પરમિશન સેટ કરો અને SSH સેટઅપ પૂરું કરો
-RUN mkdir -p -m 0700 /root/.ssh && \
-    echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
+# SSH કી માટે સિક્રેટ માઉન્ટનો ઉપયોગ કરો (આ એક જ ભાગ રાખવો)
+RUN --mount=type=secret,id=ssh_private_key \
+    mkdir -p -m 0700 /root/.ssh && \
+    cat /run/secrets/ssh_private_key > /root/.ssh/id_rsa && \
     chmod 600 /root/.ssh/id_rsa && \
     ssh-keyscan github.com >> /root/.ssh/known_hosts && \
     git config --global url."git@github.com:".insteadOf "https://github.com/"
