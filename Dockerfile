@@ -3,14 +3,9 @@ WORKDIR /src
 
 RUN apk add --no-cache git openssh-client
 
-# Railway માટે બેસ્ટ પદ્ધતિ: ARG અને base64
+# Railway માટે Base64 SSH Key સેટઅપ
 ARG SSH_PRIVATE_KEY
-
-RUN mkdir -p -m 0700 /root/.ssh && \
-    echo "$SSH_PRIVATE_KEY" | base64 -d > /root/.ssh/id_rsa && \
-    chmod 600 /root/.ssh/id_rsa && \
-    ssh-keyscan github.com >> /root/.ssh/known_hosts && \
-    git config --global url."git@github.com:".insteadOf "https://github.com/"
+RUN mkdir -p -m 0700 /root/.ssh &&     echo "$SSH_PRIVATE_KEY" | base64 -d > /root/.ssh/id_rsa &&     chmod 600 /root/.ssh/id_rsa &&     ssh-keyscan github.com >> /root/.ssh/known_hosts &&     git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 ENV GOPRIVATE=github.com/Nil-Vaghani/*
 
@@ -27,4 +22,4 @@ COPY --from=build --chown=nonroot:nonroot /src/demo /demo
 COPY --from=build --chown=nonroot:nonroot /src/sdk /sdk
 EXPOSE 8080
 USER nonroot:nonroot
-ENTRYPOINT ["/busybox/sh", "-c", "exec /syncwell -addr :${PORT:-8080} -static /demo"]
+ENTRYPOINT ["/busybox/sh", "-c", "exec /syncwell -addr :\${PORT:-8080} -static /demo"]
